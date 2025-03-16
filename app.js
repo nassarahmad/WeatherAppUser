@@ -28,7 +28,7 @@ connection.connect((err) => {
 // Register a new user
 app.post('/register', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password ,isAdmin} = req.body;
 
         // Check if the username already exists
         connection.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
@@ -50,8 +50,8 @@ app.post('/register', async (req, res) => {
 
                 // Insert the user into the database
                 connection.query(
-                    'INSERT INTO users (username, password) VALUES (?, ?)',
-                    [username, hashedPassword],
+                    'INSERT INTO users (username, password,is_admin) VALUES (?, ?)',
+                    [username, hashedPassword,isAdmin||false],
                     (err, result) => {
                         if (err) {
                             console.error(err);
@@ -59,9 +59,9 @@ app.post('/register', async (req, res) => {
                         }
 
                         // Generate a JWT token
-                        const token = jwt.sign({ id: result.insertId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                        const token = jwt.sign({ id: result.insertId,isAdmin:isAdmin||false }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-                        res.status(201).json({ user: { id: result.insertId, username }, token });
+                        res.status(201).json({ user: { id: result.insertId, username,isAdmin:isAdmin||false }, token });
                     }
                 );
             });
@@ -97,9 +97,17 @@ app.post('/login', async (req, res) => {
                 }
 
                 // Generate a JWT token
-                const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                const token = jwt.sign({ id: user.id, isAdmin: user.is_admin }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-                res.json({ token });
+                // Set the token in a cookie
+                res.cookie('token', token, {
+                    httpOnly: true, // Prevents client-side JavaScript from accessing the cookie
+                    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+                    sameSite: 'strict', // Prevents CSRF attacks
+                    maxAge: 3600000 // Cookie expires in 1 hour (in milliseconds)
+                });
+
+                res.json({ message: 'Login successful', isAdmin: user.is_admin });
             });
         });
     } catch (error) {
@@ -107,6 +115,27 @@ app.post('/login', async (req, res) => {
         res.status(400).json({ error: 'Login failed' });
     }
 });
+
+const isAdmin = (req, res, next) => {
+    const token = req.cookies.token; // Get the token from cookies
+    if (!token) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decoded.isAdmin) {
+            return res.status(403).json({ error: 'Access denied. Admin privileges required.' });
+        }
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.status(400).json({ error: 'Invalid token' });
+    }
+};
+
+
+
 
 // Middleware to authenticate requests
 const authenticate = (req, res, next) => {
@@ -123,6 +152,15 @@ const authenticate = (req, res, next) => {
         res.status(400).json({ error: 'Invalid token' });
     }
 };
+
+app.get('/admin/dashboard', isAdmin, (req, res) => {
+    res.json({ message: 'Welcome to the admin dashboard!' });
+});
+
+app.post('/logout', (req, res) => {
+    res.clearCookie('token'); // Clear the token cookie
+    res.json({ message: 'Logout successful' });
+});
 
 // Get weather data for a city
 app.get('/weather', authenticate, async (req, res) => {
