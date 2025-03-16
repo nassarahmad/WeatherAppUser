@@ -15,7 +15,7 @@ const connection = mysql.createConnection({
     host: "localhost",
     user: "root",
     password: "123000",
-    database: "library"
+    database: "weatherappuser"
 });
 
 // Connect to MySQL
