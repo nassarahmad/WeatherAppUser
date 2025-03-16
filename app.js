@@ -183,6 +183,31 @@ app.get('/weather', authenticate, async (req, res) => {
     }
 });
 
+
+// Endpoint to get Fire Index for a location
+app.get('/fire-index', async (req, res) => {
+    try {
+        // Get latitude and longitude from query parameters
+        const { lat, lon } = req.query;
+
+        if (!lat || !lon) {
+            return res.status(400).json({ error: 'Missing latitude or longitude' });
+        }
+
+        // Fetch Fire Index data from OpenWeatherMap API
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/fire/index?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}`
+        );
+
+        // Send the response back to the client
+        res.json(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch Fire Index data' });
+    }
+});
+
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`Server has been started on http://localhost:${PORT}`);
