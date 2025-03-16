@@ -114,11 +114,9 @@ app.post('/login', async (req, res) => {
                     sameSite: 'strict', // Prevents CSRF attacks
                     maxAge: 3600000 // Cookie expires in 1 hour (in milliseconds)
                 });
-                        if(isAdmin){
-                res.json({ message: 'Login successful Admin', isAdmin: user.is_admin });
-                        }else{
-                            res.json({ message: 'Login successful user' });
-                        }
+                const message = user.is_admin ? 'Login successful Admin' : 'Login successful User';
+
+                res.json({ message, isAdmin: user.is_admin });
             });
         });
     } catch (error) {
