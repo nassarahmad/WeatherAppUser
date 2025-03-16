@@ -161,6 +161,7 @@ app.post('/logout', (req, res) => {
     res.clearCookie('token'); // Clear the token cookie
     res.json({ message: 'Logout successful' });
 });
+                    //advance features
 
 // Get weather data for a city
 app.get('/weather', authenticate, async (req, res) => {
@@ -204,6 +205,63 @@ app.get('/fire-index', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to fetch Fire Index data' });
+    }
+});
+// weather now 
+app.get('/weather/current', async (req, res) => {
+    try {
+        const { lat, lon } = req.query;
+
+        if (!lat || !lon) {
+            return res.status(400).json({ error: 'Latitude and longitude are required' });
+        }
+
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`
+        );
+
+        res.json(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch current weather data' });
+    }
+});
+//forcast for 7days
+app.get('/weather/forecast', async (req, res) => {
+    try {
+        const { lat, lon } = req.query;
+
+        if (!lat || !lon) {
+            return res.status(400).json({ error: 'Latitude and longitude are required' });
+        }
+
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=current,minutely,hourly&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`
+        );
+
+        res.json(response.data.daily);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch weather forecast' });
+    }
+});
+// location weather
+app.post('/location', async (req, res) => {
+    try {
+        const { lat, lon } = req.body;
+
+        if (!lat || !lon) {
+            return res.status(400).json({ error: 'Latitude and longitude are required' });
+        }
+
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}`
+        );
+
+        res.json(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch location data' });
     }
 });
 
