@@ -184,6 +184,30 @@ app.get('/weather', authenticate, async (req, res) => {
     }
 });
 
+/* app.get('/weather/city', async (req, res) => {
+    try {
+        const { city } = req.query;
+
+        if (!city) {
+            return res.status(400).json({ error: 'City parameter is required' });
+        }
+
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`
+        );
+
+        res.json(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch weather data for the city' });
+    }
+});
+ */
+
+
+
+
+
 
 // Endpoint to get Fire Index for a location
 app.get('/fire-index', async (req, res) => {
@@ -264,6 +288,115 @@ app.post('/location', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch location data' });
     }
 });
+// using air quality external api
+app.get('/air-quality', async (req, res) => {
+    try {
+        const { lat, lon } = req.query;
+
+        if (!lat || !lon) {
+            return res.status(400).json({ error: 'Latitude and longitude are required' });
+        }
+
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}`
+        );
+
+        res.json(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch air quality data' });
+    }
+});
+//notification about weather
+app.get('/alerts', async (req, res) => {
+    try {
+        const { lat, lon } = req.query;
+
+        if (!lat || !lon) {
+            return res.status(400).json({ error: 'Latitude and longitude are required' });
+        }
+
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}`
+        );
+
+        res.json(response.data.alerts || []);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch weather alerts' });
+    }
+});
+// for example celiseos and fehrenhite
+app.get('/weather/unit', async (req, res) => {
+    try {
+        const { city, unit } = req.query;
+
+        if (!city || !unit) {
+            return res.status(400).json({ error: 'City and unit parameters are required' });
+        }
+
+        const units = unit === 'imperial' ? 'imperial' : 'metric';
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.OPENWEATHER_API_KEY}&units=${units}`
+        );
+
+        res.json(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch weather data with unit' });
+    }
+});
+// dark and white mood
+app.get('/theme', (req, res) => {
+    const theme = req.query.mode === 'dark' ? 'dark' : 'light';
+    res.json({ theme });
+});
+//favourites
+app.post('/favorites/add', authenticate, (req, res) => {
+    try {
+        const { city } = req.body;
+        const userId = req.user.id;
+
+        connection.query(
+            'INSERT INTO favorites (user_id, city) VALUES (?, ?)',
+            [userId, city],
+            (err, result) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(400).json({ error: 'Failed to add favorite' });
+                }
+
+                res.json({ message: 'Favorite added successfully' });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+app.get('/favorites/list', authenticate, (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        connection.query(
+            'SELECT * FROM favorites WHERE user_id = ?',
+            [userId],
+            (err, results) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(400).json({ error: 'Failed to fetch favorites' });
+                }
+
+                res.json(results);
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
 
 
 // Start the server
