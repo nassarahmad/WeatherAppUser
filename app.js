@@ -26,10 +26,15 @@ connection.connect((err) => {
 });
 
 // Register a new user
-app.post('/register', async (req, res) => {
+ app.post('/register', async (req, res) => {
+    const isAdmin = req.body.isAdmin === true || req.body.isAdmin === 'true';
+
     try {
         const { username, password ,isAdmin} = req.body;
-
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
+        
         // Check if the username already exists
         connection.query('SELECT * FROM users WHERE username = ?', [username], (err, results) => {
             if (err) {
@@ -50,7 +55,7 @@ app.post('/register', async (req, res) => {
 
                 // Insert the user into the database
                 connection.query(
-                    'INSERT INTO users (username, password,is_admin) VALUES (?, ?)',
+                    'INSERT INTO users (username,password,is_admin) VALUES (?, ?,?)',
                     [username, hashedPassword,isAdmin||false],
                     (err, result) => {
                         if (err) {
@@ -60,6 +65,7 @@ app.post('/register', async (req, res) => {
 
                         // Generate a JWT token
                         const token = jwt.sign({ id: result.insertId,isAdmin:isAdmin||false }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                        console.log("JWT Secret:", process.env.JWT_SECRET);
 
                         res.status(201).json({ user: { id: result.insertId, username,isAdmin:isAdmin||false }, token });
                     }
@@ -70,7 +76,9 @@ app.post('/register', async (req, res) => {
         console.error(error);
         res.status(400).json({ error: 'Registration failed' });
     }
-});
+}); 
+
+
 
 // Login a user
 app.post('/login', async (req, res) => {
@@ -106,8 +114,11 @@ app.post('/login', async (req, res) => {
                     sameSite: 'strict', // Prevents CSRF attacks
                     maxAge: 3600000 // Cookie expires in 1 hour (in milliseconds)
                 });
-
-                res.json({ message: 'Login successful', isAdmin: user.is_admin });
+                        if(isAdmin){
+                res.json({ message: 'Login successful Admin', isAdmin: user.is_admin });
+                        }else{
+                            res.json({ message: 'Login successful user' });
+                        }
             });
         });
     } catch (error) {
@@ -153,14 +164,14 @@ const authenticate = (req, res, next) => {
     }
 };
 
-app.get('/admin/dashboard', isAdmin, (req, res) => {
+/* app.get('/admin/dashboard', isAdmin, (req, res) => {
     res.json({ message: 'Welcome to the admin dashboard!' });
-});
+}); */
 
-app.post('/logout', (req, res) => {
+/* app.post('/logout', (req, res) => {
     res.clearCookie('token'); // Clear the token cookie
     res.json({ message: 'Logout successful' });
-});
+}); */
                     //advance features
 
 // Get weather data for a city
