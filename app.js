@@ -4,8 +4,9 @@ require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
-
+const cookieParser = require('cookie-parser');
 const app = express();
+app.use(cookieParser());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
@@ -147,7 +148,25 @@ const isAdmin = (req, res, next) => {
 
 
 // Middleware to authenticate requests
+
 const authenticate = (req, res, next) => {
+    const token = req.cookies.token; // Get the token from cookies
+    if (!token) {
+        return res.status(401).json({ error: 'Access denied. No token provided.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (error) {
+        res.clearCookie('token'); // Clear the cookie if the token is invalid or expired
+        res.status(400).json({ error: 'Invalid or expired token' });
+    }
+};
+
+
+/* const authenticate = (req, res, next) => {
     const token = req.header('Authorization');
     if (!token) {
         return res.status(401).json({ error: 'Access denied. No token provided.' });
@@ -160,16 +179,16 @@ const authenticate = (req, res, next) => {
     } catch (error) {
         res.status(400).json({ error: 'Invalid token' });
     }
-};
+}; */
 
 /* app.get('/admin/dashboard', isAdmin, (req, res) => {
     res.json({ message: 'Welcome to the admin dashboard!' });
 }); */
 
-/* app.post('/logout', (req, res) => {
+ app.post('/logout', (req, res) => {
     res.clearCookie('token'); // Clear the token cookie
     res.json({ message: 'Logout successful' });
-}); */
+}); 
                     //advance features
 
 // Get weather data for a city
@@ -259,7 +278,7 @@ app.get('/weather/current', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch current weather data' });
     }
 });
-//forcast for 7days
+//forecast for 7days
 app.get('/weather/forecast', async (req, res) => {
     try {
         const { lat, lon } = req.query;
@@ -335,7 +354,7 @@ app.get('/alerts', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch weather alerts' });
     }
 });
-// for example celiseos and fehrenhite
+// for example celsius and fahrenheit
 app.get('/weather/unit', async (req, res) => {
     try {
         const { city, unit } = req.query;
@@ -360,7 +379,7 @@ app.get('/theme', (req, res) => {
     const theme = req.query.mode === 'dark' ? 'dark' : 'light';
     res.json({ theme });
 });
-//favourites
+//favorites
 app.post('/favorites/add', authenticate, (req, res) => {
     try {
         const { city } = req.body;
