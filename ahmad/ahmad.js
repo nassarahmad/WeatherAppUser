@@ -221,7 +221,7 @@ app.get('/weather', authenticate, async (req, res) => {
         }
 
         const response = await axios.get(
-            `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`
+            https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric
         );
 
         res.json(response.data);
@@ -345,7 +345,7 @@ app.get('/alerts', async (req, res) => {
         }
 
         const response = await axios.get(
-            `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}`
+           ` https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}`
         );
 
         res.json(response.data.alerts || []);
