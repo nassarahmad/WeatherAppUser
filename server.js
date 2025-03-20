@@ -19,7 +19,6 @@ const PORT = process.env.PORT || 3000;
 const appRoute = require("./route/Routes"); 
 app.use("/api", appRoute);
 
-
 app.use(express.static(path.join(__dirname, "front")));
 
 

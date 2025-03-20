@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const axios = require("axios");
 require("dotenv").config();
 const {connection} = require("../database/db"); // distraction 
+const authenticate = require("./middleware/authenticate"); // Import the authenticate middleware
+
+
 
 const app = express();
 const router = express.Router();
@@ -39,6 +42,7 @@ router.route("/register").post( async (req, res) => {
     });
 });
 });
+
 
 // Login a user
 router.route('/login').post( async (req, res) => {
@@ -130,8 +134,6 @@ router.route("/forgot-password").post(async (req, res) => {
 });
 
 
-
-
 // Get Weather Data
 router.route("/weather/:city").get( async (req, res) => {
     try {
@@ -154,6 +156,7 @@ router.route("/weather/:city").get( async (req, res) => {
         res.status(500).json({ error: "Failed to fetch weather data" });
     }
 });
+
 
 // Add Favorite City
 router.route("/favorites").post( (req, res) => {
@@ -237,80 +240,125 @@ router.route("/forecast/:city").get(async (req, res) => {
     }
   });
 
-
-
-
-
-
-// Logout - Clear Token
-router.post("/logout:id", (req, res) => {
-    const id=req.params
-    res.clearCookie("token");
-    res.json({ message: "Logged out successfully" });
-});
-
-
-// POST /location: Fetch weather data based on latitude and longitude from the request body
-app.post('/location', async (req, res) => {
+  router.route("/current-weather").get(async (req, res) => {
     try {
-        const { lat, lon } = req.body;
+        const { latitude, longitude } = req.query;
 
-        // Validate input
-        if (!lat || !lon) {
-            return res.status(400).json({ error: 'Latitude and longitude are required' });
+        // تحقق من وجود latitude و longitude
+        if (!latitude || !longitude) {
+            return res.status(400).json({ error: "Latitude and longitude are required" });
         }
 
-        // Fetch weather data from OpenWeatherMap API
+        const apiKey = process.env.OPENWEATHER_API_KEY;
+
+        // إرسال طلب إلى OpenWeatherMap API
         const response = await axios.get(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}`
+            `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`
         );
 
-        // Return the weather data
-        res.json(response.data);
+        // إرجاع بيانات الطقس
+        res.json({
+            city: response.data.name,
+            temperature: response.data.main.temp,
+            description: response.data.weather[0].description,
+            humidity: response.data.main.humidity,
+            windSpeed: response.data.wind.speed,
+            fullData: response.data,
+        });
     } catch (error) {
         console.error(error);
-
-        // Handle specific Axios errors
-        if (error.response) {
-            // OpenWeatherMap API returned an error response
-            return res.status(error.response.status || 500).json({ error: error.response.data.message || 'Failed to fetch location data' });
-        }
-
-        // Generic server error
-        res.status(500).json({ error: 'Failed to fetch location data' });
+        res.status(500).json({ error: "Failed to fetch current weather data" });
     }
 });
 
-// GET /weather/current: Fetch current weather data based on latitude and longitude from query parameters
-app.get('/weather/current', async (req, res) => {
-    try {
-        const { lat, lon } = req.query;
 
-        // Validate input
-        if (!lat || !lon) {
-            return res.status(400).json({ error: 'Latitude and longitude are required' });
+
+router.route("/current-weather").get(async (req, res) => {
+    try {
+        const { latitude, longitude } = req.query;
+
+        // Validate latitude and longitude
+        if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+            return res.status(400).json({ error: "Valid latitude and longitude are required" });
         }
 
-        // Fetch weather data from OpenWeatherMap API
+        const lat = parseFloat(latitude);
+        const lon = parseFloat(longitude);
+
+        if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+            return res.status(400).json({ error: "Latitude must be between -90 and 90, and longitude must be between -180 and 180" });
+        }
+
+        // Check if API key is configured
+        const apiKey = process.env.OPENWEATHER_API_KEY;
+        if (!apiKey) {
+            return res.status(500).json({ error: "API key is not configured" });
+        }
+
+        // Fetch weather data from OpenWeather API
         const response = await axios.get(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`
+            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
         );
 
-        // Return the weather data
-        res.json(response.data);
+        // Send the formatted response
+        res.json({
+            city: response.data.name,
+            temperature: response.data.main.temp,
+            description: response.data.weather[0].description,
+            humidity: response.data.main.humidity,
+            windSpeed: response.data.wind.speed,
+            fullData: response.data,
+        });
+
     } catch (error) {
-        console.error(error);
+        console.error("Error fetching weather data:", error);
 
-        // Handle specific Axios errors
         if (error.response) {
-            // OpenWeatherMap API returned an error response
-            return res.status(error.response.status || 500).json({ error: error.response.data.message || 'Failed to fetch current weather data' });
+            // Handle API errors
+            return res.status(error.response.status || 500).json({ error: "Failed to fetch weather data", details: error.response.data });
+        } else if (error.request) {
+            // Handle no response errors
+            return res.status(500).json({ error: "No response from weather service" });
+        } else {
+            // Handle other errors
+            return res.status(500).json({ error: "Internal server error" });
         }
-
-        // Generic server error
-        res.status(500).json({ error: 'Failed to fetch current weather data' });
     }
 });
+
+
+// Logout a user
+ router.route('/logout').post(authenticate, async (req, res) => {
+    try {
+        const userId = req.user.id; // User ID from the authenticated request
+        const token = req.cookies.token; // Token from the cookie
+
+        // Delete the token from the database
+        connection.query(
+            'DELETE FROM user_tokens WHERE user_id = ? AND token = ?',
+            [userId, token],
+            (err) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).json({ error: 'Failed to logout' });
+                }
+
+                // Clear the token cookie
+                res.clearCookie('token', {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'strict'
+                });
+
+                res.status(200).json({ message: 'Logout successful' });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Logout failed' });
+    }
+});
+ 
 
 
 module.exports = router;
