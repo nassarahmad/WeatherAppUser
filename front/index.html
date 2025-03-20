@@ -1,68 +1,126 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
     <link rel="stylesheet" href="styles.css">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <title>Weather_APP</title>
 </head>
 <body>
-    <div class="container">
-        <div class="search-box">
-            <i class='bx bx-search'></i>
-            <input type="text" placeholder="Enter your location">
-            <button class="bx bx-search"></button>
+    
+<div class="container" id="container">
+	<div class="form-container sign-up-container">
+		<form action="#">
+			<h1>Create Account</h1>
+			
+			<span>or use your email for registration</span>
+			<input type="text" placeholder="Name" />
+			<input type="email" placeholder="Email" />
+			<input type="password" placeholder="Password" />
+			<button>Sign Up</button>
+		</form>
+	</div>
+	<div class="form-container sign-in-container">
+		<form action="#">
+			<h1>Sign in</h1>
+			
+			<span>or use your account</span>
+			<input type="email" placeholder="Email" />
+			<input type="password" placeholder="Password" />
+			<a href="#">Forgot your password?</a>
+			<button>Sign In</button>
+		</form>
+	</div>
+	<div class="overlay-container">
+		<div class="overlay">
+			<div class="overlay-panel overlay-left">
+				<h1>Welcome Back!</h1>
+				<p>To keep connected with us please login with your personal info</p>
+				<button class="ghost" id="signIn">Sign In</button>
+			</div>
+			<div class="overlay-panel overlay-right">
+				<h1>Hello, Friend!</h1>
+				<p>Enter your personal details and start journey with us</p>
+				<button class="ghost" id="signUp">Sign Up</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script src="app.js"></script>
+</body>
+</html> -->
+
+
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Weather_APP</title>
+</head>
+<body>
+    
+<div class="container" id="container">
+    <div class="form-container sign-up-container">
+        <form action="#">
+            <h1>Create Account</h1>
+            
+            <span>or use your email for registration</span>
+            <input type="text" placeholder="Name" />
+            <input type="email" placeholder="Email" />
+            <input type="password" placeholder="Password" />
+            <button>Sign Up</button>
+        </form>
+    </div>
+    <div class="form-container sign-in-container">
+      <!--   <form action="#">
+            <h1>Sign in</h1>
+            
+            <span>or use your account</span>
+            <input type="email" placeholder="Email" />
+            <input type="password" placeholder="Password" />
+            <a href="#">Forgot your password?</a>
+            <button id="signInButton">Sign In</button>
+        </form> -->
+		<form id="signInForm">
+			<h1>Sign in</h1>
+			<span>or use your account</span>
+			<input type="email" id="email" placeholder="Email" required />
+			<input type="password" id="password" placeholder="Password" required />
+			<!-- <a href="#">Forgot your password?</a> -->
+			<div id="forgotPasswordModal" class="modal">
+				<div class="modal-content">
+					<span class="close">&times;</span>
+					<h2>Forgot Password</h2>
+					<form id="forgotPasswordForm">
+						<input type="email" id="forgotEmail" placeholder="Enter your email" required />
+						<button type="submit">Reset Password</button>
+					</form>
+				</div>
+			</div>
+			<button type="submit">Sign In</button>
+		</form>
+    </div>
+    <div class="overlay-container">
+        <div class="overlay">
+            <div class="overlay-panel overlay-left">
+                <h1>Welcome Back!</h1>
+                <p>To keep connected with us please login with your personal info</p>
+                <button class="ghost" id="signInOverlay">Sign In</button>
         </div>
-        <p class="city-hide"></p>
-        <div class="weather-box">
-            <div class="box">
-                <div class="info-weather">
-                    <div class="weather">
-                        <img src="images/cloud.png" >
-                        <p class="temperature">0 <span>°C</span></p>
-                        <p class="description">Broken clouds</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="weather-details">
-            <div class="humidity">
-                <i class='bx bx-water'></i>
-                <div class="text">
-                    <div class="info-humidity">
-                        <span>0%</span>
-                    </div>
-                    <p>Humidity</p>
-                </div>
-            </div>
-
-            <div class="wind">
-                <i class='bx bx-wind'></i>
-                <div class="text">
-                    <div class="info-wind">
-                        <span>0Km/h</span>
-                    </div>
-                    <p>Wind Speed</p>
-                </div>
-            </div>
-
-
-
-
-
-
-        </div>
-        <div class="not-found">
-            <div class="box">
-                <img src="images/404.png">
-                <p>Oops! Location not found!</p>
+            <div class="overlay-panel overlay-right">
+                <h1>Hello, Friend!</h1>
+                <p>Enter your personal details and start journey with us</p>
+                <button class="ghost" id="signUp">Sign Up</button>
             </div>
         </div>
     </div>
-    
-    <script src="script.js"></script>
-    <script src="../server.js"></script>
+</div>
+
+<script src="app.js"></script>
 </body>
-</html>
+</html> 

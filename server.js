@@ -23,7 +23,7 @@ app.use(express.static(path.join(__dirname, "front")));
 
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "front", "interface.html"));
+  res.sendFile(path.join(__dirname, "front", "index.html"));
 });
 
 // Start Server
