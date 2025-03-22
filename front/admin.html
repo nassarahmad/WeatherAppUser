@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - المسؤول</title>
+    <link rel="stylesheet" href="styles.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>مرحبًا، المسؤول!</h1>
+        <p>هذه هي صفحة المسؤول.</p>
+        <button onclick="logout()">تسجيل الخروج</button>
+    </div>
+    <script>
+        function logout() {
+            // إرسال طلب تسجيل الخروج إلى الخادم (إذا لزم الأمر)
+            fetch('/api/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = '/index.html'; // العودة إلى صفحة تسجيل الدخول
+                });
+        }
+    </script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

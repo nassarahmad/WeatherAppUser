@@ -273,7 +273,7 @@ router.route("/forecast/:city").get(async (req, res) => {
 
 
 
-router.route("/current-weather").get(async (req, res) => {
+/* router.route("/current-weather").get(async (req, res) => {
     try {
         const { latitude, longitude } = req.query;
 
@@ -324,7 +324,7 @@ router.route("/current-weather").get(async (req, res) => {
             return res.status(500).json({ error: "Internal server error" });
         }
     }
-});
+}); */
 
 
 // Logout a user

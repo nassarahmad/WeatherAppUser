@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
 
 * {
@@ -5,7 +6,7 @@
 }
 
 body {
-	background:   #f8f6f6;
+	background: #f6f5f7;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -161,7 +162,7 @@ input {
 .overlay {
 	background: #FF416C;
 	background: -webkit-linear-gradient(to right, #FF4B2B, #FF416C);
-	background: linear-gradient(to right, #FF4B2B, #FF4B2B);
+	background: linear-gradient(to right, #FF4B2B, #FF416C);
 	background-repeat: no-repeat;
 	background-size: cover;
 	background-position: 0 0;
@@ -251,37 +252,25 @@ footer a {
 }
 
 
-/* Add this to your styles.css */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1;
-    left: 0;
+
+/* Add these styles to the existing styles.css */
+.forgot-password-container {
+    position: absolute;
     top: 0;
-    width: 100%;
+    left: 0;
+    width: 50%;
     height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    z-index: 1;
+    transition: all 0.6s ease-in-out;
 }
 
-.modal-content {
-    background-color: #fff;
-    margin: 15% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    max-width: 400px;
-    text-align: center;
+.container.forgot-password-active .sign-in-container {
+    transform: translateX(-100%);
 }
 
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close:hover {
-    color: #000;
+.container.forgot-password-active .forgot-password-container {
+    transform: translateX(0);
+    opacity: 1;
+    z-index: 5;
 }

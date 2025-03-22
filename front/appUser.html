@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="weather-container">
+        <h1>Weather App</h1>
+        <div id="current-weather">
+            <h2>Current Weather</h2>
+            <input type="text" id="city-input" placeholder="Enter city name">
+            <button id="get-weather-btn">Get Weather</button>
+            <div id="weather-info"></div>
+        </div>
+        <div id="favorite-cities">
+            <h2>Favorite Cities</h2>
+            <input type="text" id="favorite-city-input" placeholder="Add favorite city">
+            <button id="add-favorite-btn">Add Favorite</button>
+            <ul id="favorite-list"></ul>
+        </div>
+        <div id="forecast">
+            <h2>5-Day Forecast</h2>
+            <div id="forecast-info"></div>
+        </div>
+        <button id="logout-btn">Logout</button>
+    </div>
+    <script src="weather.js"></script>
+</body>
+</html>
