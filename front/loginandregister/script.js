@@ -160,9 +160,10 @@ function sendLoginRequest(username, password, latitude, longitude) {
                     confirmButtonText: 'OK'
                 }).then(() => {
                     if (data.isAdmin) {
-                        window.location.href = '/admin.html';
+                        window.location.href = 'admindashboard/index.html';
                     } else {
-                        window.location.href = '/wither.html';
+                        window.location.href = '../appuser/appUser.html';
+                      
                     }
                 });
             } else {
@@ -189,7 +190,7 @@ function sendLoginRequest(username, password, latitude, longitude) {
 
 
 //
-document.addEventListener('DOMContentLoaded', function () {
+/* document.addEventListener('DOMContentLoaded', function () {
     const cityInput = document.getElementById('city-input');
     const getWeatherBtn = document.getElementById('get-weather-btn');
     const weatherInfo = document.getElementById('weather-info');
@@ -280,9 +281,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Logout
     logoutBtn.addEventListener('click', () => {
         localStorage.removeItem('token'); // Assuming you store a token for authentication
-        window.location.href = '/index.html'; // Redirect to login page
+        window.location.href = '../loginandregister/index.html'; // Redirect to login page
     });
   
     // Initial update of favorite list
     updateFavoriteList();
-  });
+  }); */
