@@ -26,6 +26,74 @@ const userTableBody = document.querySelector('#userTable tbody');
 
 const apiCityInput = document.getElementById('apiCity');
 
+
+
+
+
+
+
+
+
+
+
+// Handle Sign Up Form Submission
+document.getElementById('userForm').addEventListener('submit', function (event) {
+  event.preventDefault();
+
+  const username = document.getElementById('username').value;
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('passwordInput').value;
+
+  fetch('/api/register', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username, email, password })
+  })
+      .then(response => response.json())
+      .then(data => {
+          if (data.token) {
+              Swal.fire({
+                  icon: 'success',
+                  title: 'Registration Successful!',
+                  text: 'You have been successfully registered.',
+                  confirmButtonText: 'OK'
+              }).then(() => {
+                  window.location.href = '/index.html'; // Redirect to user page after successful registration
+              });
+          } else {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Registration Failed',
+                  text: data.error || 'Registration failed',
+                  confirmButtonText: 'OK'
+              });
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          Swal.fire({
+              icon: 'error',
+              title: 'Registration Failed',
+              text: 'An error occurred during registration.',
+              confirmButtonText: 'OK'
+          });
+      });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Fetch Weather Data from OpenWeatherMap API
 async function fetchWeather() {
   const city = apiCityInput.value;
@@ -177,57 +245,11 @@ function deleteUser(index) {
   renderUserTable();
 }
 
+
+
+
+
 // Initial Render
 renderWeatherTable();
 renderUserTable();
 
-
-
-
-
-
-
-document.getElementById('userForm').addEventListener('submit', function (event) {
-  event.preventDefault();
-
-  const username = document.getElementById('username').value;
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('passwordInput').value;
-
-  fetch('/api/register', {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ username, email, password })
-  })
-      .then(response => response.json())
-      .then(data => {
-          if (data.token) {
-              Swal.fire({
-                  icon: 'success',
-                  title: 'Registration Successful!',
-                  text: 'You have been successfully registered.',
-                  confirmButtonText: 'OK'
-              }).then(() => {
-                  window.location.href = '/index.html'; // Redirect to user page after successful registration
-              });
-          } else {
-              Swal.fire({
-                  icon: 'error',
-                  title: 'Registration Failed',
-                  text: data.error || 'Registration failed',
-                  confirmButtonText: 'OK'
-              });
-          }
-      })
-      .catch(error => {
-          console.error('Error:', error);
-          Swal.fire({
-              icon: 'error',
-              title: 'Registration Failed',
-              text: 'An error occurred during registration.',
-              confirmButtonText: 'OK'
-          });
-      });
-});

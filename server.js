@@ -11,7 +11,6 @@ const path = require("path");
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:5500", credentials: true }));
 app.use(cookieParser());
 
 const PORT = process.env.PORT || 3000;
@@ -19,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 const appRoute = require("./route/Routes"); 
 app.use("/api", appRoute);
 
-app.use(express.static(path.join(__dirname, "front/loginandregister")));
+app.use(express.static(path.join(__dirname, "front")));
 
 
 app.get("/", (req, res) => {

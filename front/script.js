@@ -162,7 +162,7 @@ function sendLoginRequest(username, password, latitude, longitude) {
                     if (data.isAdmin) {
                         window.location.href = 'admindashboard/index.html';
                     } else {
-                        window.location.href = '../appuser/appUser.html';
+                        window.location.href = 'appuser/appUser.html';
                       
                     }
                 });
