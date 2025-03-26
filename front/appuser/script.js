@@ -281,7 +281,7 @@ function updateForecastUI(data) {
 
 
 // Display Favorite Cities
-async function displayFavorites() {
+ async function displayFavorites() {
   if (!currentUser) {
       console.log("User not logged in");
       return;
@@ -419,10 +419,10 @@ async function displayFavorites() {
   } finally {
       loadingIndicator.style.display = 'none';
   }
-}
+} 
 
 // Add Favorite City
-async function addFavorite() {
+ async function addFavorite() {
     if (!currentUser || !currentCity) {
         Swal.fire({
             icon: 'warning',
@@ -474,7 +474,7 @@ async function addFavorite() {
     } finally {
         loadingIndicator.style.display = 'none';
     }
-}
+} 
 
 // Get Weather by Current Location
 async function getWeatherByLocation() {
