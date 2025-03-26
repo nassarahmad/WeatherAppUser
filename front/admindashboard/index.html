@@ -11,13 +11,15 @@
     <h1>Weather App Admin Dashboard</h1>
 
     <!-- Fetch Weather Data from API -->
-    <div class="api-section">
-      <input type="text" id="apiCity" placeholder="Enter City Name">
-      <button onclick="fetchWeather()">Fetch Weather</button>
-    </div>
+    
 
-    <!-- Weather Data Form -->
-    <form id="weatherForm">
+    <!-- Weather Data Form
+     <div class="api-section">
+      <input type="text" id="apiCity" placeholder="Enter City Name">
+      
+    </div>
+     <button onclick="fetchWeather()">Fetch Weather</button>
+     <form id="weatherForm">
       <input type="text" id="city" placeholder="City" required>
       <input type="number" id="temperature" placeholder="Temperature (°C)" required>
       <input type="text" id="condition" placeholder="Weather Condition" required>
@@ -26,9 +28,12 @@
       <button type="submit" id="addBtn">Add Weather</button>
       <button type="button" id="updateBtn" style="display: none;">Update Weather</button>
     </form>
+    
+    -->
+    
 
-    <!-- Weather Data Table -->
-    <h2>Weather Data</h2>
+    <!-- Weather Data Table   
+     <h2>Weather Data</h2>
     <table id="weatherTable">
       <thead>
         <tr>
@@ -41,12 +46,13 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Rows will be dynamically added here -->
+        Rows will be dynamically added here -->
       </tbody>
-    </table>
+    </table> 
+    
 
     <!-- User Management Section -->
-    <h2>User Management</h2>
+    <h2 id="userManagement">User Management</h2>
     <table id="userManagementTable">
       <thead>
         <tr>

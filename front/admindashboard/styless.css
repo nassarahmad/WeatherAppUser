@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #212529;
     margin: 0;
     padding: 0;
   }
@@ -9,13 +9,17 @@ body {
     max-width: 800px;
     margin: 50px auto;
     padding: 20px;
-    background: #fff;
+    background: #4d4a4a;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
   
   h1 {
     text-align: center;
-    color: #333;
+    color: #0f0f0f;
+  }
+  #userManagement {
+    text-align: center;
+    color: #070606;
   }
   
   form {
@@ -57,7 +61,7 @@ body {
   }
   
   table th {
-    background-color: #f8f9fa;
+    background-color: #140e1221;
   }
   
   table td button {
