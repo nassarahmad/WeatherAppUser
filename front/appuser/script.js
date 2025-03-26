@@ -385,9 +385,9 @@ function updateForecastUI(data) {
                       // عرض رسالة نجاح
                       Swal.fire({
                           icon: 'success',
-                          title: 'تم الحذف',
-                          text: `تمت إزالة ${cityName} من المفضلة`,
-                          confirmButtonText: 'حسناً'
+                          title: 'DELETED',
+                          text: `delete ${cityName} from favorites `,
+                          confirmButtonText: 'okey'
                       });
                       
                       // إذا لم تعد هناك مدن مفضلة، عرض رسالة
