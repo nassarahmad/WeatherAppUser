@@ -47,22 +47,15 @@
 
     <!-- User Management Section -->
     <h2>User Management</h2>
-    <form id="userForm">
-      <input type="text" id="username" placeholder="Username" required>
-      <input type="email" id="email" placeholder="Email" required>
-      <input type="password" id="passwordInput" placeholder="password" required>
-
-      <button type="submit" id="addUserBtn">Add User</button>
-    </form>
-
-    <!-- User Data Table -->
-    <table id="userTable">
+    <table id="userManagementTable">
       <thead>
         <tr>
+          <th>ID</th>
           <th>Username</th>
           <th>Email</th>
-          <th>password</th>
-
+          <th>Is Admin</th>
+          <th>Latitude</th>
+          <th>Longitude</th>
           <th>Actions</th>
         </tr>
       </thead>

@@ -5,7 +5,7 @@ const axios = require("axios");
 require("dotenv").config();
 const {connection} = require("../database/db"); // distraction 
 const authenticate = require("./middleware/authenticate"); // Import the authenticate middleware
-
+const authenticateuser = require("./middleware/authenticateuser");
 
 
 const app = express();
@@ -135,12 +135,15 @@ router.route("/forgot-password").post(async (req, res) => {
 
 
 // Get Weather Data
-router.route("/weather/:city").get( async (req, res) => {
+router.route("/weather/:city").get(async (req, res) => {
     try {
         const city = req.params.city;
         const apiKey = process.env.OPENWEATHER_API_KEY;
-        const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`);
-
+        
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`
+        );
+        
         res.json({
             requestedData: {
                 city: response.data.name,
@@ -149,9 +152,8 @@ router.route("/weather/:city").get( async (req, res) => {
                 humidity: response.data.main.humidity,
                 windSpeed: response.data.wind.speed
             },
-            fullData: response.data
+            fullData: response.data // سيحتوي على sunrise, sunset, timezone
         });
-        
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch weather data" });
     }
@@ -159,88 +161,141 @@ router.route("/weather/:city").get( async (req, res) => {
 
 
 // Add Favorite City
-router.route("/favorites").post( (req, res) => {
-    const { userId, city } = req.body;
-    connection.query("INSERT INTO favorite_cities (user_id, city_name) VALUES (?, ?)", [userId, city], (err) => {
-        if (err) return res.status(500).json({ error: "Failed to add city to favorites" });
-        res.status(201).json({ message: "City added to favorites" });
-    });
+router.route("/favorites").post((req, res) => {
+    const { userId, city, latitude, longitude } = req.body;
+    
+    connection.query(
+        "INSERT INTO favorite_cities (user_id, city_name, latitude, longitude) VALUES (?, ?, ?, ?)",
+        [userId, city, latitude, longitude],
+        (err, result) => {
+            if (err) {
+                console.error("Database error:", err);
+                return res.status(500).json({ 
+                    error: "Failed to add city to favorites",
+                    details: err.message
+                });
+            }
+            
+            res.status(201).json({ 
+                success: true,
+                message: "City added to favorites",
+                cityId: result.insertId
+            });
+        }
+    );
+});
+
+router.route("/favorites/:userId").get((req, res) => {
+    const userId = req.params.userId;
+    
+    connection.query(
+        "SELECT id, user_id, city_name, latitude, longitude FROM favorite_cities WHERE user_id = ?",
+        [userId],
+        (err, results) => {
+            if (err) {
+                console.error("Database error:", err);
+                return res.status(500).json({ 
+                    error: "Failed to fetch favorite cities",
+                    details: err.message
+                });
+            }
+            
+            res.json({
+                success: true,
+                favorites: results
+            });
+        }
+    );
 });
 
 
 // Get Favorite Cities with Weather
-router.route("/favorites/:userId").get( async (req, res) => {
+router.route("/favorites/:userId").get(async (req, res) => {
     const userId = req.params.userId;
-    const apiKey = process.env.OPENWEATHER_API_KEY;
 
-    connection.query("SELECT city_name FROM favorite_cities WHERE user_id = ?", [userId], async (err, results) => {
-        if (err) return res.status(500).json({ error: "Failed to fetch favorite cities" });
+    connection.query(
+        "SELECT city_name, latitude, longitude FROM favorite_cities WHERE user_id = ?", 
+        [userId], 
+        (err, results) => {
+            if (err) {
+                console.error("Database error:", err);
+                return res.status(500).json({ 
+                    error: "Failed to fetch favorite cities",
+                    details: err.message 
+                });
+            }
 
-        const favoriteCities = results.map(row => row.city_name);
-        const weatherData = await Promise.all(
-            favoriteCities.map(city => axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
-                .then(response => ({
-                    city,
-                    temperature: response.data.main.temp,
-                    description: response.data.weather[0].description,
-                    humidity: response.data.main.humidity,
-                    windSpeed: response.data.wind.speed
-                }))
-                .catch(() => ({ city, error: "Weather data unavailable" }))
-            )
-        );
-
-        res.json({ favorites: weatherData });
-    });
+            // إرجاع النتائج مباشرة
+            res.json({ 
+                success: true,
+                favorites: results 
+            });
+        }
+    );
 });
 
-
 // Remove Favorite City
-router.route("/favorites/:userId/:city").delete( (req, res) => {
+router.route("/favorites/:userId/:city").delete((req, res) => {
     const userId = req.params.userId;
     const city = req.params.city;
 
-    connection.query("DELETE FROM favorite_cities WHERE user_id = ? AND city_name = ?", [userId, city], (err, result) => {
-        if (err) return res.status(500).json({ error: "Failed to remove city from favorites" });
-        if (result.affectedRows === 0) return res.status(404).json({ error: "City not found in favorites" });
+    connection.query(
+        "DELETE FROM favorite_cities WHERE user_id = ? AND city_name = ?",
+        [userId, city],
+        (err, result) => {
+            if (err) {
+                console.error("Database error:", err);
+                return res.status(500).json({ 
+                    error: "Failed to remove city from favorites",
+                    details: err.message
+                });
+            }
 
-        res.status(200).json({ message: "City removed from favorites" });
-    });
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ 
+                    error: "City not found in favorites" 
+                });
+            }
+
+            res.status(200).json({ 
+                success: true,
+                message: "City removed from favorites" 
+            });
+        }
+    );
 });
 
 
 // Get Weather Forecast for the next 5 days
 router.route("/forecast/:city").get(async (req, res) => {
     try {
-      const city = req.params.city;
-      const apiKey = process.env.OPENWEATHER_API_KEY;
-  
-      const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`
-      );
-  
-      // Extract the relevant data (every 8 timestamps = 1 day)
-      const forecastData = response.data.list
-        .filter((_, index) => index % 8 === 0)
-        .map((entry) => ({
-          date: entry.dt_txt.split(" ")[0],
-          temperature: entry.main.temp,
-          description: entry.weather[0].description,
-          humidity: entry.main.humidity,
-          windSpeed: entry.wind.speed,
-        }));
-  
-      res.json({
-        city: response.data.city.name,
-        forecast: forecastData,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to fetch weather forecast" });
-    }
-  });
+        const city = req.params.city;
+        const apiKey = process.env.OPENWEATHER_API_KEY;
 
-  router.route("/current-weather").get(async (req, res) => {
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`
+        );
+
+        // تأكد من أن البيانات المرجعة تحتوي على structure صحيح
+        res.json({
+            city: response.data.city.name,
+            forecast: response.data.list.filter((_, index) => index % 8 === 0).map(item => ({
+                dt: item.dt,
+                main: item.main,
+                weather: item.weather,
+                dt_txt: item.dt_txt
+            })),
+            list: response.data.list // للاستخدام في التوقعات الساعية
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch weather forecast" });
+    }
+});
+
+
+// current weather
+router.route("/current-weather").get(async (req, res) => {
     try {
         const { latitude, longitude } = req.query;
 
@@ -272,93 +327,187 @@ router.route("/forecast/:city").get(async (req, res) => {
 });
 
 
-
-/* router.route("/current-weather").get(async (req, res) => {
+// Get all users (Admin only)
+router.route("/users").get(authenticateuser, async (req, res) => {
     try {
-        const { latitude, longitude } = req.query;
-
-        // Validate latitude and longitude
-        if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
-            return res.status(400).json({ error: "Valid latitude and longitude are required" });
+        // Check if the authenticated user is an admin
+        if (!req.user.isAdmin) {
+            return res.status(403).json({ error: "Unauthorized: Only admins can access this resource" });
         }
 
-        const lat = parseFloat(latitude);
-        const lon = parseFloat(longitude);
+        // Fetch all users from the database
+        connection.query("SELECT id, username, email, is_admin FROM users", (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Failed to fetch users" });
+            }
 
-        if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
-            return res.status(400).json({ error: "Latitude must be between -90 and 90, and longitude must be between -180 and 180" });
-        }
-
-        // Check if API key is configured
-        const apiKey = process.env.OPENWEATHER_API_KEY;
-        if (!apiKey) {
-            return res.status(500).json({ error: "API key is not configured" });
-        }
-
-        // Fetch weather data from OpenWeather API
-        const response = await axios.get(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
-        );
-
-        // Send the formatted response
-        res.json({
-            city: response.data.name,
-            temperature: response.data.main.temp,
-            description: response.data.weather[0].description,
-            humidity: response.data.main.humidity,
-            windSpeed: response.data.wind.speed,
-            fullData: response.data,
+            res.status(200).json({ users: results });
         });
-
     } catch (error) {
-        console.error("Error fetching weather data:", error);
-
-        if (error.response) {
-            // Handle API errors
-            return res.status(error.response.status || 500).json({ error: "Failed to fetch weather data", details: error.response.data });
-        } else if (error.request) {
-            // Handle no response errors
-            return res.status(500).json({ error: "No response from weather service" });
-        } else {
-            // Handle other errors
-            return res.status(500).json({ error: "Internal server error" });
-        }
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
     }
-}); */
+});
 
 
-// Logout a user
- router.route('/logout').post(authenticate, async (req, res) => {
+// Delete User (Admin only)
+router.route("/users/:userId").delete(authenticateuser, async (req, res) => {
     try {
-        const userId = req.user.id; // User ID from the authenticated request
-        const token = req.cookies.token; // Token from the cookie
+        const { userId } = req.params;
 
-        // Delete the token from the database
+        // Check if the authenticated user is an admin
+        if (!req.user.isAdmin) {
+            return res.status(403).json({ error: "Unauthorized: Only admins can delete users" });
+        }
+
+        // Delete the user from the database
         connection.query(
-            'DELETE FROM user_tokens WHERE user_id = ? AND token = ?',
-            [userId, token],
-            (err) => {
+            "DELETE FROM users WHERE id = ?",
+            [userId],
+            (err, result) => {
                 if (err) {
                     console.error(err);
-                    return res.status(500).json({ error: 'Failed to logout' });
+                    return res.status(500).json({ error: "Failed to delete user" });
                 }
 
-                // Clear the token cookie
-                res.clearCookie('token', {
-                    httpOnly: true,
-                    secure: process.env.NODE_ENV === 'production',
-                    sameSite: 'strict'
-                });
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ error: "User not found" });
+                }
 
-                res.status(200).json({ message: 'Logout successful' });
+                res.status(200).json({ message: "User deleted successfully" });
             }
         );
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Logout failed' });
+        res.status(500).json({ error: "Internal server error" });
     }
 });
- 
+
+// Edit User (Admin only)
+router.route("/users/:userId").put(authenticateuser, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { username, email, isAdmin } = req.body;
+
+        // Check if the authenticated user is an admin
+        if (!req.user.isAdmin) {
+            return res.status(403).json({ error: "Unauthorized: Only admins can edit users" });
+        }
+
+        // Validate input
+        if (!username || !email) {
+            return res.status(400).json({ error: "Username and email are required" });
+        }
+
+        // Update the user in the database
+        connection.query(
+            "UPDATE users SET username = ?, email = ?, is_admin = ? WHERE id = ?",
+            [username, email, isAdmin || false, userId],
+            (err, result) => {
+                if (err) {
+                    console.error(err);
+                    return res.status(500).json({ error: "Failed to update user" });
+                }
+
+                if (result.affectedRows === 0) {
+                    return res.status(404).json({ error: "User not found" });
+                }
+
+                res.status(200).json({ message: "User updated successfully" });
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+
+router.route("/geocode/:city").get(async (req, res) => {
+    try {
+        const city = req.params.city;
+        const apiKey = process.env.OPENWEATHER_API_KEY;
+        
+        const response = await axios.get(
+            `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${apiKey}`
+        );
+        
+        const locations = response.data.map(item => ({
+            name: item.name,
+            lat: item.lat,
+            lon: item.lon,
+            country: item.country
+        }));
+        
+        res.json(locations);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch city coordinates" });
+    }
+});
+
+
+// Air Quality Endpoint
+router.route("/air-quality").get(async (req, res) => {
+    try {
+        const { lat, lon } = req.query;
+        const apiKey = process.env.OPENWEATHER_API_KEY;
+        
+        const response = await axios.get(
+            `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`
+        );
+        
+        res.json(response.data);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch air quality data" });
+    }
+});
+
+// Logout Endpoint
+router.route("/logout").post(authenticate, async (req, res) => {
+    try {
+        res.clearCookie('token');
+        res.status(200).json({ message: "Logout successful" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Logout failed" });
+    }
+});
+
+// Check Auth Status Endpoint
+router.route("/check-auth").get(async (req, res) => {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
+        connection.query("SELECT id, username, email, is_admin FROM users WHERE id = ?", 
+            [decoded.id], 
+            (err, results) => {
+                if (err || results.length === 0) {
+                    return res.status(401).json({ error: "Invalid user" });
+                }
+
+                const user = results[0];
+                res.status(200).json({ 
+                    user: {
+                        id: user.id,
+                        username: user.username,
+                        email: user.email,
+                        isAdmin: user.is_admin
+                    }
+                });
+            }
+        );
+    } catch (error) {
+        res.status(401).json({ error: "Invalid token" });
+    }
+});
 
 
 module.exports = router;

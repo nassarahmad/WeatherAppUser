@@ -15,11 +15,10 @@ app.use(cookieParser());
 
 const PORT = process.env.PORT || 3000;
 
-const appRoute = require("./route/Routes"); 
+const appRoute = require("./route/Routes");
 app.use("/api", appRoute);
 
 app.use(express.static(path.join(__dirname, "front")));
-
 
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "front", "index.html"));

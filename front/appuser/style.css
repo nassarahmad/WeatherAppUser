@@ -1,0 +1,392 @@
+:root {
+  --bg-color1: #212529;
+  --bg-color2: #2a2b2d;
+  --aqi-1: #d4e157;
+  --aqi-2: #ffee58;
+  --aqi-3: #ffca28;
+  --aqi-4: #ff7043;
+  --aqi-5: #ef5350;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  min-height: 100vh;
+  background-color: var(--bg-color1);
+  color: #fff;
+  font-family: sans-serif;
+  padding: 0 15px;
+}
+hr {
+  margin-bottom: 10px;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  background-color: var(--bg-color1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 15px 0;
+  & #city_input {
+    background-color: var(--bg-color2);
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 25px;
+    color: #fff;
+    &:focus {
+      outline: none;
+    }
+  }
+
+  & #searchBtn {
+    border: none;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 25px;
+    background-color: #fff;
+    cursor: pointer;
+  }
+  & #locationBtn {
+    border: none;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 25px;
+    background-color: #ea6e4b;
+    cursor: pointer;
+  }
+
+  & #logoutBtn {
+    border: none;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 25px;
+    background-color: #e0141e;
+    cursor: pointer;
+  }
+}
+
+.card {
+  background-color: var(--bg-color2);
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+  & p {
+    font-size: 14px;
+    color: #999;
+  }
+  & h2 {
+    font-size: 32px;
+    font-weight: 500;
+  }
+}
+.weather-data {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  & #weather-left {
+    grid-column: span 1;
+    & .current-weather {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      & h2 {
+        margin: 7px 0;
+      }
+      & p {
+        color: #fff;
+      }
+    }
+    & .card-footer p {
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    & .forcast-item {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      place-items: center;
+      margin-bottom: 15px;
+      & .icon-wrapper {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+  & .weather-right {
+    grid-column: span 3;
+    & h2 {
+      margin-bottom: 10px;
+    }
+    & .highlights {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      column-gap: 15px;
+      & .card:nth-of-type(1),
+      & .card:nth-of-type(2) {
+        grid-column: span 2;
+      }
+      & .card-head {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        & .air-index {
+          color: #000;
+          padding: 5px 10px;
+          border-radius: 15px;
+          &.air-index.aqi-1 {
+            background-color: var(--aqi-1); /*the color is wrong*/
+          }
+          &.air-index.aqi-2 {
+            background-color: var(--aqi-2); /*the color is wrong*/
+          }
+          &.air-index.aqi-3 {
+            background-color: var(--aqi-3); /*the color is wrong*/
+          }
+          &.air-index.aqi-4 {
+            background-color: var(--aqi-4); /*the color is wrong*/
+          }
+          &.air-index.aqi-5 {
+            background-color: var(--aqi-5); /*the color is wrong*/
+          }
+        }
+      }
+      & .air-indices {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        place-items: center;
+        & p {
+          text-align: center;
+        }
+      }
+      & .sunrise-sunset {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        & .item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          & h2 {
+            margin-top: 15px;
+          }
+        }
+      }
+      & .card-item {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+    & .hourly-forcast {
+      /*error*/
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      column-gap: 10px;
+      & .card {
+        text-align: center;
+      }
+    }
+  }
+}
+@media (max-width: 1100px) {
+  /*عشان لما تسحب  او تقسم الشاشه يضله مرتبين */
+  .weather-data {
+    grid-template-columns: repeat(3, 1fr);
+    & .weather-right {
+      grid-column: span 2;
+      & .highlights {
+        grid-template-columns: repeat(3, 1fr);
+        & .card:nth-of-type(1) {
+          grid-column: span 3;
+        }
+      }
+      & .hourly-forcast {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+  }
+}
+
+@media (max-width: 1040px) {
+  .weather-data {
+    grid-template-columns: repeat(2, 1fr);
+    & .weather-right {
+      grid-column: span 1;
+      & .highlights {
+        grid-template-columns: repeat(2, 1fr);
+        & .card:nth-of-type(1) {
+          grid-column: span 2;
+        }
+      }
+      & .hourly-forcast {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+  }
+}
+@media (max-width: 992px) {
+  .weather-data .weather-right .highlights {
+    & .card {
+      grid-column: span 2;
+    }
+    & .air-indices {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+@media (max-width: 850px) {
+  .weather-data {
+    grid-template-columns: 1fr;
+    & .weather-right .highlights {
+      & .card:nth-of-type(3),
+      & .card:nth-of-type(4),
+      & .card:nth-of-type(5),
+      & .card:nth-of-type(6),
+      & .card:nth-of-type(7) {
+        grid-column: span 1;
+      }
+      & .air-indices {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+  }
+}
+@media (max-width: 660px) {
+  .header {
+    flex-direction: column;
+    & h2 {
+      margin-bottom: 8px;
+    }
+    & #city_input,
+    #searchBtn,
+    #locationBtn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+}
+@media (max-width: 580px) {
+  .weather-data .weather-right .highlights .air-indices {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .weather-data .weather-right .highlights {
+    & .card:nth-of-type(3),
+    & .card:nth-of-type(4),
+    & .card:nth-of-type(5),
+    & .card:nth-of-type(6),
+    & .card:nth-of-type(7) {
+      grid-column: span 2;
+    }
+    & .air-indices {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}
+@media (max-width: 480px) {
+  .weather-data .weather-right .highlights .sunrise-sunset {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 450px) {
+  .weather-data .weather-right .hourly-forcast {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 380px) {
+  .weather-data .weather-right .highlights .air-indices {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.air-index.aqi-1 {
+  background-color: var(--aqi-1) !important;
+}
+.air-index.aqi-2 {
+  background-color: var(--aqi-2) !important;
+}
+.air-index.aqi-3 {
+  background-color: var(--aqi-3) !important;
+}
+.air-index.aqi-4 {
+  background-color: var(--aqi-4) !important;
+}
+.air-index.aqi-5 {
+  background-color: var(--aqi-5) !important;
+}
+
+/* أنماط قسم المدن المفضلة */
+.favorites-section {
+  background-color: var(--bg-color2);
+  padding: 15px;
+  border-radius: 15px;
+  margin-top: 20px;
+}
+
+.favorites-section h2 {
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.favorites-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.favorite-city {
+  background-color: #3a3b3c;
+  padding: 8px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.favorite-city:hover {
+  background-color: #4a4b4c;
+}
+
+.favorite-city .remove-btn {
+  color: #ff6b6b;
+  cursor: pointer;
+}
+
+.favorite-btn {
+  background-color: #ea6e4b;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.favorite-btn:hover {
+  background-color: #d45a3a;
+}
+#loadingIndicator {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: var(--bg-color2);
+  padding: 20px;
+  border-radius: 10px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
