@@ -19,12 +19,12 @@ router.route("/register").post( async (req, res) => {
     
     
     connection.query("SELECT * FROM users WHERE username = ?", [username], (err, results) => {
-        if (err) return res.status(400).json({ error: "Registration failed" });
+        
         if (results.length > 0) return res.status(400).json({ error: "Username already exists" });
 
     connection.query("SELECT * FROM users WHERE email = ?", [email], (err, results) => {
-            if (err) return res.status(400).json({ error: "Registration failed" });
-            if (results.length > 0) return res.status(400).json({ error: "Email already exists" });
+
+    if (results.length > 0) return res.status(400).json({ error: "Email already exists" });
 
         bcrypt.hash(password, 10, (err, hashedPassword) => {
             if (err) return res.status(400).json({ error: "Registration failed" });
@@ -57,7 +57,7 @@ router.route('/login').post( async (req, res) => {
             }
 
             if (results.length === 0) {
-                return res.status(400).json({ error: 'Invalid credentials' });
+                return res.status(400).json({ error: 'user not found' });
             }
 
             const user = results[0];
@@ -65,7 +65,7 @@ router.route('/login').post( async (req, res) => {
             // Compare the password
             bcrypt.compare(password, user.password, (err, validPassword) => {
                 if (err || !validPassword) {
-                    return res.status(400).json({ error: 'Invalid credentials' });
+                    return res.status(400).json({ error: 'Invalid Password' });
                 }
 
                 // Generate a JWT token
@@ -102,9 +102,10 @@ router.route("/forgot-password").post(async (req, res) => {
 
     // Check if the user exists with the provided email and username
     connection.query("SELECT * FROM users WHERE email = ? AND username = ?", [email, username], (err, results) => {
+      //error db
         if (err) {
             console.error(err);
-            return res.status(500).json({ error: "Failed to reset password" });
+            return res.status(500).json({ error: "Failed to connect DB" });
         }
 
         if (results.length === 0) {
@@ -117,14 +118,14 @@ router.route("/forgot-password").post(async (req, res) => {
         bcrypt.hash(newPassword, 10, (err, hashedPassword) => {
             if (err) {
                 console.error(err);
-                return res.status(500).json({ error: "Failed to reset password" });
+                return res.status(500).json({ error: "Failed to hashed Password" });
             }
 
             // Update the user's password in the database
             connection.query("UPDATE users SET password = ? WHERE id = ?", [hashedPassword, user.id], (err) => {
                 if (err) {
                     console.error(err);
-                    return res.status(500).json({ error: "Failed to reset password" });
+                    return res.status(500).json({ error: "Failed to connect DB To update password" });
                 }
 
                 res.status(200).json({ message: "Password reset successfully" });
@@ -152,7 +153,7 @@ router.route("/weather/:city").get(async (req, res) => {
                 humidity: response.data.main.humidity,
                 windSpeed: response.data.wind.speed
             },
-            fullData: response.data // سيحتوي على sunrise, sunset, timezone
+            fullData: response.data 
         });
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch weather data" });
@@ -201,7 +202,7 @@ router.route("/favorites/:userId").get((req, res) => {
             }
             
             res.json({
-                success: true,
+                
                 favorites: results
             });
         }
@@ -225,9 +226,7 @@ router.route("/favorites/:userId").get(async (req, res) => {
                 });
             }
 
-            // إرجاع النتائج مباشرة
             res.json({ 
-                success: true,
                 favorites: results 
             });
         }
@@ -246,7 +245,7 @@ router.route("/favorites/:userId/:city").delete((req, res) => {
             if (err) {
                 console.error("Database error:", err);
                 return res.status(500).json({ 
-                    error: "Failed to remove city from favorites",
+                    error: "Failed to fetch DB",
                     details: err.message
                 });
             }
@@ -258,13 +257,12 @@ router.route("/favorites/:userId/:city").delete((req, res) => {
             }
 
             res.status(200).json({ 
-                success: true,
+                
                 message: "City removed from favorites" 
             });
         }
     );
 });
-
 
 // Get Weather Forecast for the next 5 days
 router.route("/forecast/:city").get(async (req, res) => {
@@ -274,10 +272,7 @@ router.route("/forecast/:city").get(async (req, res) => {
 
         const response = await axios.get(
             `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`
-        );
-
-        // تأكد من أن البيانات المرجعة تحتوي على structure صحيح
-        res.json({
+        ); res.json({
             city: response.data.city.name,
             forecast: response.data.list.filter((_, index) => index % 8 === 0).map(item => ({
                 dt: item.dt,
@@ -285,7 +280,7 @@ router.route("/forecast/:city").get(async (req, res) => {
                 weather: item.weather,
                 dt_txt: item.dt_txt
             })),
-            list: response.data.list // للاستخدام في التوقعات الساعية
+            list: response.data.list 
         });
     } catch (error) {
         console.error(error);
@@ -299,19 +294,17 @@ router.route("/current-weather").get(async (req, res) => {
     try {
         const { latitude, longitude } = req.query;
 
-        // تحقق من وجود latitude و longitude
+        // latitude  longitude
         if (!latitude || !longitude) {
             return res.status(400).json({ error: "Latitude and longitude are required" });
         }
 
         const apiKey = process.env.OPENWEATHER_API_KEY;
 
-        // إرسال طلب إلى OpenWeatherMap API
         const response = await axios.get(
             `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`
         );
 
-        // إرجاع بيانات الطقس
         res.json({
             city: response.data.name,
             temperature: response.data.main.temp,
@@ -328,7 +321,7 @@ router.route("/current-weather").get(async (req, res) => {
 
 
 // Get all users (Admin only)
-router.route("/users").get(authenticateuser, async (req, res) => {
+router.route("/users").get(authenticateuser,  (req, res) => {
     try {
         // Check if the authenticated user is an admin
         if (!req.user.isAdmin) {
@@ -352,7 +345,7 @@ router.route("/users").get(authenticateuser, async (req, res) => {
 
 
 // Delete User (Admin only)
-router.route("/users/:userId").delete(authenticateuser, async (req, res) => {
+router.route("/users/:userId").delete(authenticateuser, (req, res) => {
     try {
         const { userId } = req.params;
 
@@ -388,12 +381,8 @@ router.route("/users/:userId").delete(authenticateuser, async (req, res) => {
 router.route("/users/:userId").put(authenticateuser, async (req, res) => {
     try {
         const { userId } = req.params;
-        const { username, email, isAdmin } = req.body;
+        const { username, email} = req.body;
 
-        // Check if the authenticated user is an admin
-        if (!req.user.isAdmin) {
-            return res.status(403).json({ error: "Unauthorized: Only admins can edit users" });
-        }
 
         // Validate input
         if (!username || !email) {
@@ -402,8 +391,8 @@ router.route("/users/:userId").put(authenticateuser, async (req, res) => {
 
         // Update the user in the database
         connection.query(
-            "UPDATE users SET username = ?, email = ?, is_admin = ? WHERE id = ?",
-            [username, email, isAdmin || false, userId],
+            "UPDATE users SET username = ?, email = ?  WHERE id = ?",
+            [username, email || false, userId],
             (err, result) => {
                 if (err) {
                     console.error(err);
@@ -424,7 +413,7 @@ router.route("/users/:userId").put(authenticateuser, async (req, res) => {
 });
 
 
-router.route("/geocode/:city").get(async (req, res) => {
+ router.route("/geocode/:city").get(async (req, res) => {
     try {
         const city = req.params.city;
         const apiKey = process.env.OPENWEATHER_API_KEY;
@@ -445,7 +434,7 @@ router.route("/geocode/:city").get(async (req, res) => {
         console.error(error);
         res.status(500).json({ error: "Failed to fetch city coordinates" });
     }
-});
+}); 
 
 
 // Air Quality Endpoint
@@ -463,7 +452,7 @@ router.route("/air-quality").get(async (req, res) => {
         console.error(error);
         res.status(500).json({ error: "Failed to fetch air quality data" });
     }
-});
+}); 
 
 // Logout Endpoint
 router.route("/logout").post(authenticate, async (req, res) => {
@@ -476,38 +465,6 @@ router.route("/logout").post(authenticate, async (req, res) => {
     }
 });
 
-// Check Auth Status Endpoint
-router.route("/check-auth").get(async (req, res) => {
-    try {
-        const token = req.cookies.token;
-        if (!token) {
-            return res.status(401).json({ error: "Not authenticated" });
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
-        connection.query("SELECT id, username, email, is_admin FROM users WHERE id = ?", 
-            [decoded.id], 
-            (err, results) => {
-                if (err || results.length === 0) {
-                    return res.status(401).json({ error: "Invalid user" });
-                }
-
-                const user = results[0];
-                res.status(200).json({ 
-                    user: {
-                        id: user.id,
-                        username: user.username,
-                        email: user.email,
-                        isAdmin: user.is_admin
-                    }
-                });
-            }
-        );
-    } catch (error) {
-        res.status(401).json({ error: "Invalid token" });
-    }
-});
 
 
 module.exports = router;

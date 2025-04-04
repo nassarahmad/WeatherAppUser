@@ -52,8 +52,7 @@ function renderUserManagementTable(users) {
       <td>${user.username}</td>
       <td>${user.email}</td>
       <td>${user.is_admin ? 'Yes' : 'No'}</td>
-      <td>${user.latitude || 'N/A'}</td>
-      <td>${user.longitude || 'N/A'}</td>
+      
       <td>
         <button class="edit" onclick="editUser(${user.id})">Edit</button>
         <button class="delete" onclick="deleteUser(${user.id})">Delete</button>
@@ -67,7 +66,7 @@ function renderUserManagementTable(users) {
 async function editUser(userId) {
   const username = prompt('Enter new username:');
   const email = prompt('Enter new email:');
-  const isAdmin = confirm('Is this user an admin?');
+ 
 
   if (username && email) {
     try {
@@ -77,7 +76,7 @@ async function editUser(userId) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({ username, email, is_admin: isAdmin })
+        body: JSON.stringify({ username, email })
       });
 
       if (response.ok) {
