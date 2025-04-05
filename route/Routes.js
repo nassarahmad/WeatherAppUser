@@ -161,27 +161,49 @@ router.route("/weather/:city").get(async (req, res) => {
 });
 
 
-// Add Favorite City
+
+
 router.route("/favorites").post((req, res) => {
     const { userId, city, latitude, longitude } = req.body;
-    
+
+    // Step 1: Check if the city already exists for the user
     connection.query(
-        "INSERT INTO favorite_cities (user_id, city_name, latitude, longitude) VALUES (?, ?, ?, ?)",
-        [userId, city, latitude, longitude],
-        (err, result) => {
+        "SELECT * FROM favorite_cities WHERE user_id = ? AND city_name = ?",
+        [userId, city],
+        (err, results) => {
             if (err) {
                 console.error("Database error:", err);
-                return res.status(500).json({ 
-                    error: "Failed to add city to favorites",
+                return res.status(500).json({
+                    error: "Failed to check existing city in favorites",
                     details: err.message
                 });
             }
-            
-            res.status(201).json({ 
-                success: true,
-                message: "City added to favorites",
-                cityId: result.insertId
-            });
+
+            // Step 2: If the city already exists, return an error response
+            if (results.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "City already exists in favorites"
+                });
+            }
+            connection.query(
+                "INSERT INTO favorite_cities (user_id, city_name, latitude, longitude) VALUES (?, ?, ?, ?)",
+                [userId, city, latitude, longitude],
+                (err, result) => {
+                    if (err) {
+                        console.error("Database error:", err);
+                        return res.status(500).json({
+                            error: "Failed to add city to favorites",
+                            details: err.message
+                        });
+                    }
+                    res.status(201).json({
+                        success: true,
+                        message: "City added to favorites",
+                        cityId: result.insertId
+                    });
+                }
+            );
         }
     );
 });
@@ -467,35 +489,34 @@ router.route("/logout").post(authenticate, async (req, res) => {
 
 router.route("/check-auth").get(async (req, res) => {
     try {
-      const token = req.cookies.token;
-      if (!token) {
+        const token = req.cookies.token;
+            if (!token) {
         return res.status(401).json({ error: "Not authenticated" });
-      }
-  
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  
-      connection.query(
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        connection.query(
         "SELECT id, username, email, is_admin FROM users WHERE id = ?",
         [decoded.id],
         (err, results) => {
-          if (err || results.length === 0) {
+            if (err || results.length === 0) {
             return res.status(401).json({ error: "Invalid user" });
-          }
-  
-          const user = results[0];
-          res.status(200).json({
+            }
+            const user = results[0];
+            res.status(200).json({
             user: {
-              id: user.id,
-              username: user.username,
-              email: user.email,
-              isAdmin: user.is_admin,
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                isAdmin: user.is_admin,
             },
-          });
+            });
         }
-      );
+        );
     } catch (error) {
-      res.status(401).json({ error: "Invalid token" });
+        res.status(401).json({ error: "Invalid token" });
     }
-  });
+    });
 
 module.exports = router;
