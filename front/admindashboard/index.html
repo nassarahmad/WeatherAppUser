@@ -4,34 +4,88 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Weather App Admin Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="styless.css">
 </head>
 <body>
+  <!-- Alert Container -->
+  <div id="alertContainer"></div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="modal-overlay">
+    <div class="confirmation-modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirm Action</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body" id="modalMessage">
+        Are you sure you want to perform this action?
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
+        <button class="btn btn-danger" id="confirmBtn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div id="editUserModal" class="modal-overlay">
+    <div class="confirmation-modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit User</h3>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="editUserForm">
+          <div class="form-group">
+            <label for="editUsername">Username</label>
+            <input type="text" id="editUsername" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="editEmail">Email</label>
+            <input type="email" id="editEmail" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="editIsAdmin">Admin Status</label>
+            <select id="editIsAdmin" class="form-control">
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="editCancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="editSaveBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
   <div class="dashboard">
-    <h1>Weather App Admin Dashboard</h1>
+    <div class="dashboard-header">
+      <h1><i class="fas fa-cloud-sun"></i> Weather App Admin Dashboard</h1>
+      <button id="logoutBtn" class="btn btn-logout">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
 
-    
-      </tbody>
-    </table> 
-    
-
-    
-    <h2 id="userManagement">User Management</h2>
-    <table id="userManagementTable">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Username</th>
-          <th>Email</th>
-          <th>Is Admin</th>
-          
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        
-      </tbody>
-    </table>
+    <h2 id="userManagement"><i class="fas fa-users-cog"></i> User Management</h2>
+    <div class="table-responsive">
+      <table id="userManagementTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Is Admin</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Users will be loaded here -->
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script src="server.js"></script>
