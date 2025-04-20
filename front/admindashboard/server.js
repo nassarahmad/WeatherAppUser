@@ -24,7 +24,7 @@ async function fetchUsers() {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}` // Assuming you store the token in localStorage
+        'Authorization': `Bearer ${localStorage.getItem('token')}` 
       }
     });
 

@@ -41,10 +41,10 @@ async function searchCity() {
   const cityName = cityInput.value.trim();
   if (!cityName) {
       Swal.fire({
-          icon: 'warning',
-          title: 'مدينة فارغة',
-          text: 'الرجاء إدخال اسم مدينة',
-          confirmButtonText: 'حسناً'
+            icon: 'warning',
+            title: 'Empty City',
+            text: 'Please enter a city name',
+            confirmButtonText: 'OK'
       });
       return;
   }
@@ -52,7 +52,7 @@ async function searchCity() {
   try {
       loadingIndicator.style.display = 'flex';
       
-      // 1. الحصول على إحداثيات المدينة
+      
       const geoResponse = await fetch(`/api/geocode/${encodeURIComponent(cityName)}`);
       if (!geoResponse.ok) {
           throw new Error('City not found');
@@ -65,16 +65,16 @@ async function searchCity() {
 
       const { lat, lon, name, country } = geoData[0];
       
-      // 2. الحصول على بيانات الطقس
+      
       await getWeatherByCoordinates(lat, lon, name, country);
       
   } catch (error) {
-      console.error('Search error:', error);
-      Swal.fire({
-          icon: 'error',
-          title: 'خطأ في البحث',
-          text: error.message || 'فشل في العثور على المدينة',
-          confirmButtonText: 'حسناً'
+        console.error('Search error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Search Error',  
+            text: error.message || 'Failed to find the city',  
+            confirmButtonText: 'OK'  
       });
   } finally {
       loadingIndicator.style.display = 'none';
@@ -83,28 +83,28 @@ async function searchCity() {
 
 async function getWeatherByCoordinates(lat, lon, name, country) {
   try {
-      // 1. الحصول على الطقس الحالي
+      
       const weatherResponse = await fetch(`/api/current-weather?latitude=${lat}&longitude=${lon}`);
       if (!weatherResponse.ok) throw new Error('Failed to fetch weather');
       
       const weatherData = await weatherResponse.json();
       updateWeatherUI(weatherData);
       
-      // 2. الحصول على جودة الهواء
+      
       const aqiResponse = await fetch(`/api/air-quality?lat=${lat}&lon=${lon}`);
       if (aqiResponse.ok) {
           const aqiData = await aqiResponse.json();
           updateAQIUI(aqiData);
       }
       
-      // 3. الحصول على التوقعات
+      
       const forecastResponse = await fetch(`/api/forecast/${encodeURIComponent(name)}`);
       if (!forecastResponse.ok) throw new Error('Failed to fetch forecast');
       
       const forecastData = await forecastResponse.json();
       updateForecastUI(forecastData);
       
-      // تحديث المدينة الحالية
+    
       currentCity = {
           name: name,
           lat: lat,
@@ -319,10 +319,10 @@ function updateForecastUI(data) {
           ).join('')
           : '<p class="no-favorites">No favorite cities yet</p>';
       
-      // إضافة مستمع الأحداث لعرض معلومات المدينة
+    
       document.querySelectorAll('.favorite-city').forEach(item => {
           item.addEventListener('click', async (e) => {
-              // منع التنفيذ إذا كانت النقرة على زر الحذف
+              
               if (e.target.closest('.remove-btn')) {
                   return;
               }
@@ -334,14 +334,12 @@ function updateForecastUI(data) {
               try {
                   loadingIndicator.style.display = 'flex';
                   
-                  // عرض معلومات المدينة باستخدام الإحداثيات
+                  
                   const weatherResponse = await fetch(`/api/current-weather?latitude=${lat}&longitude=${lon}`);
                   if (!weatherResponse.ok) throw new Error('Failed to fetch weather');
                   
                   const weatherData = await weatherResponse.json();
                   updateWeatherUI(weatherData);
-                  
-                  // تحديث المدينة الحالية
                   currentCity = {
                       name: cityName,
                       lat: lat,
@@ -363,11 +361,11 @@ function updateForecastUI(data) {
           });
       });
       
-      // إضافة مستمع الأحداث لحذف المدينة
+      
       document.querySelectorAll('.remove-btn').forEach(btn => {
           btn.addEventListener('click', async (e) => {
-              e.stopPropagation(); // منع تنفيذ حدث العنصر الأب
-              e.preventDefault(); // منع السلوك الافتراضي
+              e.stopPropagation(); 
+              e.preventDefault(); 
               
               const cityElement = e.target.closest('.favorite-city');
               const cityName = cityElement.dataset.city;
@@ -379,10 +377,10 @@ function updateForecastUI(data) {
                   });
                   
                   if (deleteResponse.ok) {
-                      // إزالة العنصر من الواجهة
+                      
                       cityElement.remove();
                       
-                      // عرض رسالة نجاح
+                    
                       Swal.fire({
                           icon: 'success',
                           title: 'DELETED',
@@ -390,7 +388,7 @@ function updateForecastUI(data) {
                           confirmButtonText: 'okey'
                       });
                       
-                      // إذا لم تعد هناك مدن مفضلة، عرض رسالة
+                      
                       if (document.querySelectorAll('.favorite-city').length === 0) {
                           favoritesList.innerHTML = '<p class="no-favorites">No favorite cities yet</p>';
                       }
@@ -402,9 +400,9 @@ function updateForecastUI(data) {
                   console.error('Error deleting favorite:', error);
                   Swal.fire({
                       icon: 'error',
-                      title: 'خطأ',
-                      text: error.message || 'فشل في حذف المدينة من المفضلة',
-                      confirmButtonText: 'حسناً'
+                      title: 'Search Error',  
+                      text: error.message || 'Failed to find the city',  
+                      confirmButtonText: 'OK'  
                   });
               }
           });

@@ -193,70 +193,7 @@ function sendLoginRequest(username, password, latitude, longitude) {
 }
 
 
-// Weather condition backgrounds (GIFs)
-const weatherBackgrounds = {
-  clear: 'https://i.gifer.com/7VE.gif', // Sunny
-  clouds: 'https://i.gifer.com/7JmJ.gif', // Cloudy
-  rain: 'https://i.gifer.com/7JzA.gif', // Rain
-  snow: 'https://i.gifer.com/7JtJ.gif', // Snow
-  thunderstorm: 'https://i.gifer.com/7JtQ.gif', // Storm
-  mist: 'https://i.gifer.com/7JtK.gif', // Fog/Mist
-  default: 'https://i.gifer.com/7VE.gif' // Default sunny
-};
-
-// Function to set background based on weather condition
-function setWeatherBackground(condition) {
-  const bgElement = document.getElementById('weather-background');
-  let bgUrl;
-  
-  switch(condition.toLowerCase()) {
-    case 'clear':
-      bgUrl = weatherBackgrounds.clear;
-      break;
-    case 'clouds':
-      bgUrl = weatherBackgrounds.clouds;
-      break;
-    case 'rain':
-    case 'drizzle':
-      bgUrl = weatherBackgrounds.rain;
-      break;
-    case 'snow':
-      bgUrl = weatherBackgrounds.snow;
-      break;
-    case 'thunderstorm':
-      bgUrl = weatherBackgrounds.thunderstorm;
-      break;
-    case 'mist':
-    case 'fog':
-    case 'haze':
-      bgUrl = weatherBackgrounds.mist;
-      break;
-    default:
-      bgUrl = weatherBackgrounds.default;
-  }
-  
-  bgElement.style.backgroundImage = `url('${bgUrl}')`;
-}
-
-// Example usage with weather API (replace with your actual API call)
-function fetchWeather(city) {
-  // This is a mock - replace with your actual API call
-  const mockWeather = {
-    weather: [{ main: 'Clear' }] // Can be 'Clear', 'Clouds', 'Rain', etc.
-  };
-  
-  // In a real app, you would do:
-  // fetch(weatherAPIurl)
-  //   .then(response => response.json())
-  //   .then(data => {
-  //     const condition = data.weather[0].main;
-  //     setWeatherBackground(condition);
-  //   });
-  
-  setWeatherBackground(mockWeather.weather[0].main);
-}
-
 // Initialize with default weather
 document.addEventListener('DOMContentLoaded', () => {
-  fetchWeather('London'); // Replace with your default city or user's location
+  fetchWeather('London'); 
 });

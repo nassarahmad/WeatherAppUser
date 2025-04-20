@@ -195,7 +195,7 @@ hr {
   }
 }
 @media (max-width: 1100px) {
-  /*عشان لما تسحب  او تقسم الشاشه يضله مرتبين */
+  
   .weather-data {
     grid-template-columns: repeat(3, 1fr);
     & .weather-right {
@@ -322,7 +322,7 @@ hr {
   background-color: var(--aqi-5) !important;
 }
 
-/* أنماط قسم المدن المفضلة */
+
 .favorites-section {
   background-color: var(--bg-color2);
   padding: 15px;
